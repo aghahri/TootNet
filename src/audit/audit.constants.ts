@@ -1,0 +1,34 @@
+/**
+ * Audit action and resource type constants.
+ * Keeps naming consistent and makes future admin/audit browsing easy to extend.
+ */
+export const AuditAction = {
+  NETWORK_MEMBER_PROMOTED: 'NETWORK_MEMBER_PROMOTED',
+  NETWORK_MEMBER_DEMOTED: 'NETWORK_MEMBER_DEMOTED',
+  GROUP_MEMBER_PROMOTED: 'GROUP_MEMBER_PROMOTED',
+  GROUP_MEMBER_DEMOTED: 'GROUP_MEMBER_DEMOTED',
+  CHANNEL_MEMBER_PROMOTED: 'CHANNEL_MEMBER_PROMOTED',
+  CHANNEL_MEMBER_DEMOTED: 'CHANNEL_MEMBER_DEMOTED',
+  NETWORK_MEMBER_SUSPENDED: 'NETWORK_MEMBER_SUSPENDED',
+  NETWORK_MEMBER_UNSUSPENDED: 'NETWORK_MEMBER_UNSUSPENDED',
+  GROUP_MESSAGE_DELETED: 'GROUP_MESSAGE_DELETED',
+  CHANNEL_MESSAGE_DELETED: 'CHANNEL_MESSAGE_DELETED',
+  GROUP_MESSAGE_EDITED: 'GROUP_MESSAGE_EDITED',
+  CHANNEL_MESSAGE_EDITED: 'CHANNEL_MESSAGE_EDITED',
+  GROUP_MESSAGE_SOFT_DELETED: 'GROUP_MESSAGE_SOFT_DELETED',
+  CHANNEL_MESSAGE_SOFT_DELETED: 'CHANNEL_MESSAGE_SOFT_DELETED',
+  MESSAGE_REPORTED: 'MESSAGE_REPORTED',
+} as const;
+
+export const AuditResourceType = {
+  NETWORK_MEMBER: 'network_member',
+  GROUP_MEMBER: 'group_member',
+  CHANNEL_MEMBER: 'channel_member',
+  GROUP_MESSAGE: 'group_message',
+  CHANNEL_MESSAGE: 'channel_message',
+  REPORT: 'report',
+} as const;
+
+export type AuditActionType = (typeof AuditAction)[keyof typeof AuditAction];
+export type AuditResourceTypeValue =
+  (typeof AuditResourceType)[keyof typeof AuditResourceType];
