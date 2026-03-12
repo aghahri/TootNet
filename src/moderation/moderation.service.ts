@@ -1,5 +1,4 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { MessageReportType } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { PermissionsService } from '../permissions/permissions.service';
 import { AuditService } from '../audit/audit.service';
@@ -15,9 +14,7 @@ export class ModerationService {
   ) {}
 
   async reportMessage(reporterId: string, dto: ReportMessageDto) {
-    const messageType = dto.messageType as MessageReportType;
-
-    if (messageType === 'GROUP') {
+    if (dto.messageType === 'GROUP') {
       const message = await this.prisma.groupMessage.findUnique({
         where: { id: dto.messageId },
         select: { id: true, groupId: true },

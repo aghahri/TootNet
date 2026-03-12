@@ -4,7 +4,6 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { NetworkMemberRole, NetworkVisibility } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { PermissionsService } from '../permissions/permissions.service';
 import { AuditService } from '../audit/audit.service';
@@ -34,7 +33,7 @@ export class NetworksService {
         name: dto.name.trim(),
         description: dto.description?.trim() ?? null,
         slug: slug ?? null,
-        visibility: dto.visibility ?? NetworkVisibility.PUBLIC,
+        visibility: (dto.visibility as any) ?? 'PUBLIC',
         createdById: userId,
       },
     });
@@ -43,7 +42,7 @@ export class NetworksService {
       data: {
         userId,
         networkId: network.id,
-        role: NetworkMemberRole.NETWORK_ADMIN,
+        role: 'NETWORK_ADMIN',
       },
     });
 
@@ -62,7 +61,7 @@ export class NetworksService {
       },
     });
 
-    return networks.map(({ members, ...n }) => ({
+    return networks.map(({ members, ...n }: any) => ({
       ...n,
       isMember: members.length > 0,
       myRole: members[0]?.role ?? null,
@@ -104,11 +103,11 @@ export class NetworksService {
       }
     }
 
-    const data: { name?: string; description?: string; slug?: string | null; visibility?: NetworkVisibility; isFeatured?: boolean } = {};
+    const data: { name?: string; description?: string; slug?: string | null; visibility?: 'PUBLIC' | 'PRIVATE' | 'INVITE_ONLY'; isFeatured?: boolean } = {};
     if (dto.name !== undefined) data.name = dto.name.trim();
     if (dto.description !== undefined) data.description = dto.description?.trim() ?? null;
     if (dto.slug !== undefined) data.slug = slug ?? null;
-    if (dto.visibility !== undefined) data.visibility = dto.visibility;
+    if (dto.visibility !== undefined) data.visibility = dto.visibility as any;
     if (dto.isFeatured !== undefined) data.isFeatured = dto.isFeatured;
 
     if (Object.keys(data).length === 0) {
@@ -139,7 +138,7 @@ export class NetworksService {
       data: {
         userId,
         networkId,
-        role: NetworkMemberRole.MEMBER,
+        role: 'MEMBER',
       },
     });
 

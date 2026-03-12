@@ -1,5 +1,5 @@
 import { IsBoolean, IsEnum, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
-import { NetworkVisibility } from '@prisma/client';
+import { NetworkVisibilityDto } from './create-network.dto';
 import { Transform } from 'class-transformer';
 
 export class UpdateNetworkDto {
@@ -20,8 +20,8 @@ export class UpdateNetworkDto {
   slug?: string;
 
   @IsOptional()
-  @IsEnum(NetworkVisibility)
-  visibility?: NetworkVisibility;
+  @IsEnum(NetworkVisibilityDto)
+  visibility?: NetworkVisibilityDto;
 
   @IsOptional()
   @Transform(({ value }) => value === true || value === 'true')

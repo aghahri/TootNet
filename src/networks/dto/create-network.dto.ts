@@ -1,5 +1,10 @@
 import { IsEnum, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
-import { NetworkVisibility } from '@prisma/client';
+
+export enum NetworkVisibilityDto {
+  PUBLIC = 'PUBLIC',
+  PRIVATE = 'PRIVATE',
+  INVITE_ONLY = 'INVITE_ONLY',
+}
 
 export class CreateNetworkDto {
   @IsString()
@@ -18,6 +23,6 @@ export class CreateNetworkDto {
   slug?: string;
 
   @IsOptional()
-  @IsEnum(NetworkVisibility)
-  visibility?: NetworkVisibility;
+  @IsEnum(NetworkVisibilityDto)
+  visibility?: NetworkVisibilityDto;
 }

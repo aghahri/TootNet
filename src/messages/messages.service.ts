@@ -119,12 +119,12 @@ export class MessagesService {
 
     const ordered = messages.reverse(); // oldest first
     const reactions = await this.getGroupReactionsForMessages(
-      ordered.map((m) => m.id),
+      ordered.map((m: any) => m.id),
       userId,
     );
 
     return {
-      data: ordered.map((m) =>
+      data: ordered.map((m: any) =>
         this.toMessageWithMedia({ ...m, reactions: reactions[m.id] ?? [] }),
       ),
       meta: {
@@ -235,12 +235,12 @@ export class MessagesService {
 
     const ordered = messages.reverse();
     const reactions = await this.getChannelReactionsForMessages(
-      ordered.map((m) => m.id),
+      ordered.map((m: any) => m.id),
       userId,
     );
 
     return {
-      data: ordered.map((m) =>
+      data: ordered.map((m: any) =>
         this.toMessageWithMedia({ ...m, reactions: reactions[m.id] ?? [] }),
       ),
       meta: {
