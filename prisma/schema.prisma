@@ -66,6 +66,8 @@ model User {
   groupsCreated   Group[]         @relation("GroupCreator")
   channelsCreated Channel[]      @relation("ChannelCreator")
   media           Media[]
+  groupMessageReactions   GroupMessageReaction[]
+  channelMessageReactions ChannelMessageReaction[]
 
   @@map("users")
 }
