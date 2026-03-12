@@ -158,7 +158,7 @@ export class NetworksService {
       orderBy: { joinedAt: 'asc' },
     });
 
-    return members.map((m) => ({
+    return members.map((m: any) => ({
       id: m.id,
       role: m.role,
       joinedAt: m.joinedAt,
