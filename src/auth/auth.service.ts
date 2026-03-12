@@ -10,7 +10,7 @@ import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
-import { GlobalRole } from '@prisma/client';
+import { GlobalRole } from '../common/enums/global-role.enum';
 import { randomBytes } from 'crypto';
 
 const SALT_ROUNDS = 10;

@@ -7,7 +7,7 @@ import {
   OnGatewayConnection,
   OnGatewayDisconnect,
 } from '@nestjs/websockets';
-import { Server } from 'socket.io';
+import { Server, Socket } from 'socket.io';
 import { Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -18,9 +18,9 @@ import { CreateMessageDto } from '../messages/dto/create-message.dto';
 const ROOM_GROUP = (id: string) => `group:${id}`;
 const ROOM_CHANNEL = (id: string) => `channel:${id}`;
 
-interface AuthenticatedSocket extends import('socket.io').Socket {
+type AuthenticatedSocket = Socket & {
   data: { userId?: string };
-}
+};
 
 @WebSocketGateway({
   cors: { origin: '*' },

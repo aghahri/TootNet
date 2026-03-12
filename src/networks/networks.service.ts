@@ -176,20 +176,20 @@ export class NetworksService {
     if (!member) {
       throw new NotFoundException('Member not found in this network');
     }
-    if (member.role === NetworkMemberRole.NETWORK_ADMIN) {
+    if (member.role === 'NETWORK_ADMIN') {
       return this.getMembers(networkId, actorUserId);
     }
 
     await this.prisma.networkMember.update({
       where: { userId_networkId: { userId: memberUserId, networkId } },
-      data: { role: NetworkMemberRole.NETWORK_ADMIN },
+      data: { role: 'NETWORK_ADMIN' },
     });
     await this.audit.log({
       actorUserId,
       action: AuditAction.NETWORK_MEMBER_PROMOTED,
       resourceType: AuditResourceType.NETWORK_MEMBER,
       resourceId: networkId,
-      metadata: { targetUserId: memberUserId, previousRole: NetworkMemberRole.MEMBER, newRole: NetworkMemberRole.NETWORK_ADMIN },
+      metadata: { targetUserId: memberUserId, previousRole: 'MEMBER', newRole: 'NETWORK_ADMIN' },
     });
     return this.getMembers(networkId, actorUserId);
   }
@@ -204,12 +204,12 @@ export class NetworksService {
     if (!member) {
       throw new NotFoundException('Member not found in this network');
     }
-    if (member.role === NetworkMemberRole.MEMBER) {
+    if (member.role === 'MEMBER') {
       return this.getMembers(networkId, actorUserId);
     }
 
     const adminCount = await this.prisma.networkMember.count({
-      where: { networkId, role: NetworkMemberRole.NETWORK_ADMIN },
+      where: { networkId, role: 'NETWORK_ADMIN' },
     });
     if (adminCount <= 1) {
       throw new ForbiddenException('Cannot demote the last network admin');
@@ -217,14 +217,14 @@ export class NetworksService {
 
     await this.prisma.networkMember.update({
       where: { userId_networkId: { userId: memberUserId, networkId } },
-      data: { role: NetworkMemberRole.MEMBER },
+      data: { role: 'MEMBER' },
     });
     await this.audit.log({
       actorUserId,
       action: AuditAction.NETWORK_MEMBER_DEMOTED,
       resourceType: AuditResourceType.NETWORK_MEMBER,
       resourceId: networkId,
-      metadata: { targetUserId: memberUserId, previousRole: NetworkMemberRole.NETWORK_ADMIN, newRole: NetworkMemberRole.MEMBER },
+      metadata: { targetUserId: memberUserId, previousRole: 'NETWORK_ADMIN', newRole: 'MEMBER' },
     });
     return this.getMembers(networkId, actorUserId);
   }

@@ -4,7 +4,6 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { GroupMemberRole } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { PermissionsService } from '../permissions/permissions.service';
 import { AuditService } from '../audit/audit.service';
@@ -43,7 +42,7 @@ export class GroupsService {
       data: {
         userId,
         groupId: group.id,
-        role: GroupMemberRole.GROUP_ADMIN,
+        role: 'GROUP_ADMIN',
       },
     });
 
@@ -92,14 +91,14 @@ export class GroupsService {
         },
         select: { role: true },
       })
-      .then((m) => m?.role === 'NETWORK_ADMIN');
+      .then((m: any) => m?.role === 'NETWORK_ADMIN');
 
     const isGroupAdmin = await this.prisma.groupMember
       .findUnique({
         where: { userId_groupId: { userId, groupId: id } },
         select: { role: true },
       })
-      .then((m) => m?.role === 'GROUP_ADMIN');
+      .then((m: any) => m?.role === 'GROUP_ADMIN');
 
     if (!isNetworkAdmin && !isGroupAdmin) {
       throw new ForbiddenException('Only network or group admins can update this group');
@@ -143,7 +142,7 @@ export class GroupsService {
       data: {
         userId,
         groupId,
-        role: GroupMemberRole.MEMBER,
+        role: 'MEMBER',
       },
     });
 
@@ -163,7 +162,7 @@ export class GroupsService {
       orderBy: { joinedAt: 'asc' },
     });
 
-    return members.map((m) => ({
+    return members.map((m: any) => ({
       id: m.id,
       role: m.role,
       joinedAt: m.joinedAt,
@@ -181,20 +180,20 @@ export class GroupsService {
     if (!member) {
       throw new NotFoundException('Member not found in this group');
     }
-    if (member.role === GroupMemberRole.GROUP_ADMIN) {
+    if (member.role === 'GROUP_ADMIN') {
       return this.getMembers(groupId, actorUserId);
     }
 
     await this.prisma.groupMember.update({
       where: { userId_groupId: { userId: memberUserId, groupId } },
-      data: { role: GroupMemberRole.GROUP_ADMIN },
+      data: { role: 'GROUP_ADMIN' },
     });
     await this.audit.log({
       actorUserId,
       action: AuditAction.GROUP_MEMBER_PROMOTED,
       resourceType: AuditResourceType.GROUP_MEMBER,
       resourceId: groupId,
-      metadata: { targetUserId: memberUserId, previousRole: GroupMemberRole.MEMBER, newRole: GroupMemberRole.GROUP_ADMIN },
+      metadata: { targetUserId: memberUserId, previousRole: 'MEMBER', newRole: 'GROUP_ADMIN' },
     });
     return this.getMembers(groupId, actorUserId);
   }
@@ -209,12 +208,12 @@ export class GroupsService {
     if (!member) {
       throw new NotFoundException('Member not found in this group');
     }
-    if (member.role === GroupMemberRole.MEMBER) {
+    if (member.role === 'MEMBER') {
       return this.getMembers(groupId, actorUserId);
     }
 
     const adminCount = await this.prisma.groupMember.count({
-      where: { groupId, role: GroupMemberRole.GROUP_ADMIN },
+      where: { groupId, role: 'GROUP_ADMIN' },
     });
     if (adminCount <= 1) {
       throw new ForbiddenException('Cannot demote the last group admin');
@@ -222,14 +221,14 @@ export class GroupsService {
 
     await this.prisma.groupMember.update({
       where: { userId_groupId: { userId: memberUserId, groupId } },
-      data: { role: GroupMemberRole.MEMBER },
+      data: { role: 'MEMBER' },
     });
     await this.audit.log({
       actorUserId,
       action: AuditAction.GROUP_MEMBER_DEMOTED,
       resourceType: AuditResourceType.GROUP_MEMBER,
       resourceId: groupId,
-      metadata: { targetUserId: memberUserId, previousRole: GroupMemberRole.GROUP_ADMIN, newRole: GroupMemberRole.MEMBER },
+      metadata: { targetUserId: memberUserId, previousRole: 'GROUP_ADMIN', newRole: 'MEMBER' },
     });
     return this.getMembers(groupId, actorUserId);
   }

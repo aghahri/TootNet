@@ -4,7 +4,7 @@ import { AdminPaginationQueryDto } from './dto/admin-pagination.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
-import { GlobalRole } from '@prisma/client';
+import { GlobalRole } from '../common/enums/global-role.enum';
 
 @Controller('admin')
 @UseGuards(JwtAuthGuard, RolesGuard)

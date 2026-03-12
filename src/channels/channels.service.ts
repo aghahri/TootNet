@@ -4,7 +4,6 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { ChannelMemberRole } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { PermissionsService } from '../permissions/permissions.service';
 import { AuditService } from '../audit/audit.service';
@@ -43,7 +42,7 @@ export class ChannelsService {
       data: {
         userId,
         channelId: channel.id,
-        role: ChannelMemberRole.CHANNEL_ADMIN,
+        role: 'CHANNEL_ADMIN',
       },
     });
 
@@ -92,14 +91,14 @@ export class ChannelsService {
         },
         select: { role: true },
       })
-      .then((m) => m?.role === 'NETWORK_ADMIN');
+      .then((m: any) => m?.role === 'NETWORK_ADMIN');
 
     const isChannelAdmin = await this.prisma.channelMember
       .findUnique({
         where: { userId_channelId: { userId, channelId: id } },
         select: { role: true },
       })
-      .then((m) => m?.role === 'CHANNEL_ADMIN');
+      .then((m: any) => m?.role === 'CHANNEL_ADMIN');
 
     if (!isNetworkAdmin && !isChannelAdmin) {
       throw new ForbiddenException('Only network or channel admins can update this channel');
@@ -143,7 +142,7 @@ export class ChannelsService {
       data: {
         userId,
         channelId,
-        role: ChannelMemberRole.SUBSCRIBER,
+        role: 'SUBSCRIBER',
       },
     });
 
@@ -163,7 +162,7 @@ export class ChannelsService {
       orderBy: { joinedAt: 'asc' },
     });
 
-    return members.map((m) => ({
+    return members.map((m: any) => ({
       id: m.id,
       role: m.role,
       joinedAt: m.joinedAt,
@@ -181,20 +180,20 @@ export class ChannelsService {
     if (!member) {
       throw new NotFoundException('Member not found in this channel');
     }
-    if (member.role === ChannelMemberRole.CHANNEL_ADMIN) {
+    if (member.role === 'CHANNEL_ADMIN') {
       return this.getMembers(channelId, actorUserId);
     }
 
     await this.prisma.channelMember.update({
       where: { userId_channelId: { userId: memberUserId, channelId } },
-      data: { role: ChannelMemberRole.CHANNEL_ADMIN },
+      data: { role: 'CHANNEL_ADMIN' },
     });
     await this.audit.log({
       actorUserId,
       action: AuditAction.CHANNEL_MEMBER_PROMOTED,
       resourceType: AuditResourceType.CHANNEL_MEMBER,
       resourceId: channelId,
-      metadata: { targetUserId: memberUserId, previousRole: ChannelMemberRole.SUBSCRIBER, newRole: ChannelMemberRole.CHANNEL_ADMIN },
+      metadata: { targetUserId: memberUserId, previousRole: 'SUBSCRIBER', newRole: 'CHANNEL_ADMIN' },
     });
     return this.getMembers(channelId, actorUserId);
   }
@@ -209,12 +208,12 @@ export class ChannelsService {
     if (!member) {
       throw new NotFoundException('Member not found in this channel');
     }
-    if (member.role === ChannelMemberRole.SUBSCRIBER) {
+    if (member.role === 'SUBSCRIBER') {
       return this.getMembers(channelId, actorUserId);
     }
 
     const adminCount = await this.prisma.channelMember.count({
-      where: { channelId, role: ChannelMemberRole.CHANNEL_ADMIN },
+      where: { channelId, role: 'CHANNEL_ADMIN' },
     });
     if (adminCount <= 1) {
       throw new ForbiddenException('Cannot demote the last channel admin');
@@ -222,14 +221,14 @@ export class ChannelsService {
 
     await this.prisma.channelMember.update({
       where: { userId_channelId: { userId: memberUserId, channelId } },
-      data: { role: ChannelMemberRole.SUBSCRIBER },
+      data: { role: 'SUBSCRIBER' },
     });
     await this.audit.log({
       actorUserId,
       action: AuditAction.CHANNEL_MEMBER_DEMOTED,
       resourceType: AuditResourceType.CHANNEL_MEMBER,
       resourceId: channelId,
-      metadata: { targetUserId: memberUserId, previousRole: ChannelMemberRole.CHANNEL_ADMIN, newRole: ChannelMemberRole.SUBSCRIBER },
+      metadata: { targetUserId: memberUserId, previousRole: 'CHANNEL_ADMIN', newRole: 'SUBSCRIBER' },
     });
     return this.getMembers(channelId, actorUserId);
   }
