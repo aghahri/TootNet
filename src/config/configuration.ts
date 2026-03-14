@@ -11,6 +11,9 @@ export default () => ({
   redis: {
     url: process.env.REDIS_URL,
   },
+  socketIoRedis: {
+    enabled: process.env.SOCKET_IO_REDIS_ENABLED === 'true',
+  },
   throttle: {
     defaultTtl: parseInt(process.env.THROTTLE_TTL_MS ?? '60000', 10),
     defaultLimit: parseInt(process.env.THROTTLE_DEFAULT_LIMIT ?? '100', 10),
