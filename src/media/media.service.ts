@@ -1,10 +1,11 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { MediaType } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
-import { RegisterMediaDto, MediaTypeDto } from './dto/register-media.dto';
+import { RegisterMediaDto } from './dto/register-media.dto';
 
 export interface MediaInfo {
   id: string;
-  type: MediaTypeDto;
+  type: MediaType;
   url: string;
   size: number;
   mimeType: string;
@@ -74,7 +75,15 @@ export class MediaService {
   }
 
   /** Lightweight payload for message responses. */
-  toMediaInfo(media: { id: string; type: MediaTypeDto; url: string; size: number; mimeType: string; originalName: string | null; createdAt: Date }): MediaInfo {
+  toMediaInfo(media: {
+    id: string;
+    type: MediaType;
+    url: string;
+    size: number;
+    mimeType: string;
+    originalName: string | null;
+    createdAt: Date;
+  }): MediaInfo {
     return {
       id: media.id,
       type: media.type,

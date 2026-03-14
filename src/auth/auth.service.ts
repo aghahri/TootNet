@@ -7,10 +7,10 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
+import { GlobalRole } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
-import { GlobalRole } from '../common/enums/global-role.enum';
 import { randomBytes } from 'crypto';
 
 const SALT_ROUNDS = 10;
@@ -119,8 +119,10 @@ export class AuthService {
 
   async logout(refreshToken: string | undefined): Promise<void> {
     if (!refreshToken) return;
+    const [tokenId] = refreshToken.split('.');
+    if (!tokenId) return;
     await this.prisma.refreshToken
-      .deleteMany({ where: { token: refreshToken } })
+      .deleteMany({ where: { id: tokenId } })
       .catch(() => {});
   }
 
@@ -163,7 +165,13 @@ export class AuthService {
     };
   }
 
-  private sanitizeUser(user: { id: string; email: string; name: string; avatar: string | null; globalRole: GlobalRole }) {
+  private sanitizeUser(user: {
+    id: string;
+    email: string;
+    name: string;
+    avatar: string | null;
+    globalRole: GlobalRole;
+  }) {
     return {
       id: user.id,
       email: user.email,
