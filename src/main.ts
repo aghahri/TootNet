@@ -9,10 +9,15 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const config = app.get(ConfigService);
 
-  const useRedisAdapter = config.get<boolean>('socketIoRedis.enabled') && config.get<string>('redis.url');
+  const redisUrl =
+    config.get<string>('redis.url') ??
+    (config.get<string>('redis.host')
+      ? `redis://${config.get<string>('redis.host')}:${config.get<number>('redis.port') ?? 6379}`
+      : null);
+  const useRedisAdapter = config.get<boolean>('socketIoRedis.enabled') && redisUrl;
   if (useRedisAdapter) {
     const redisIoAdapter = new RedisIoAdapter(app);
-    await redisIoAdapter.connectToRedis(config.get<string>('redis.url')!);
+    await redisIoAdapter.connectToRedis(redisUrl);
     app.useWebSocketAdapter(redisIoAdapter);
   } else {
     app.useWebSocketAdapter(new IoAdapter(app));

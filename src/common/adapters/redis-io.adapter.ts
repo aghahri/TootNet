@@ -6,7 +6,7 @@ import { ServerOptions } from 'socket.io';
 /**
  * Socket.IO adapter that uses Redis for pub/sub so that events are
  * broadcast across multiple backend nodes. Use when running behind
- * a load balancer with SOCKET_IO_REDIS_ENABLED=true and REDIS_URL set.
+ * a load balancer with SOCKET_IO_REDIS_ENABLED=true and REDIS_HOST/REDIS_PORT (or REDIS_URL) set.
  */
 export class RedisIoAdapter extends IoAdapter {
   private redisAdapter: ReturnType<typeof createAdapter> | null = null;
