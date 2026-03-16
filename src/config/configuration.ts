@@ -16,6 +16,14 @@ export default () => ({
   socketIoRedis: {
     enabled: process.env.SOCKET_IO_REDIS_ENABLED === 'true',
   },
+  minio: {
+    endpoint: process.env.MINIO_ENDPOINT,
+    port: process.env.MINIO_PORT ? parseInt(process.env.MINIO_PORT, 10) : undefined,
+    useSSL: process.env.MINIO_USE_SSL === 'true',
+    accessKey: process.env.MINIO_ACCESS_KEY,
+    secretKey: process.env.MINIO_SECRET_KEY,
+    bucket: process.env.MINIO_BUCKET ?? 'toot-media',
+  },
   throttle: {
     defaultTtl: parseInt(process.env.THROTTLE_TTL_MS ?? '60000', 10),
     defaultLimit: parseInt(process.env.THROTTLE_DEFAULT_LIMIT ?? '100', 10),
