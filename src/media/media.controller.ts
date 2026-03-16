@@ -10,6 +10,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { Express } from 'express';
 import { MediaService, MediaInfo } from './media.service';
 import { MediaStorageService, UploadedMediaResult } from './media-storage.service';
 import { RegisterMediaDto } from './dto/register-media.dto';

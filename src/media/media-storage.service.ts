@@ -1,6 +1,7 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Client } from 'minio';
+import { Express } from 'express';
 
 export type MediaCategory = 'images' | 'files' | 'voice' | 'video';
 
@@ -59,7 +60,7 @@ export class MediaStorageService {
   ): Promise<UploadedMediaResult> {
     const key = this.buildKey(category, file.originalname || 'upload.bin');
     try {
-      await this.client.putObject(this.bucket, key, file.buffer, {
+      await this.client.putObject(this.bucket, key, file.buffer, file.size, {
         'Content-Type': file.mimetype,
       });
     } catch (err) {
