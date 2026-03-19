@@ -46,6 +46,12 @@ export class MediaStorageService {
   }
 
   private buildPublicUrl(key: string): string {
+    const mediaBaseUrl = this.config.get<string>('MEDIA_BASE_URL');
+    if (mediaBaseUrl) {
+      const normalized = mediaBaseUrl.replace(/\/+$/, '');
+      return `${normalized}/${this.bucket}/${key}`;
+    }
+
     const endpoint = this.config.get<string>('minio.endpoint');
     const port = this.config.get<number>('minio.port');
     const useSSL = this.config.get<boolean>('minio.useSSL');
