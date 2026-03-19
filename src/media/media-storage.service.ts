@@ -46,7 +46,7 @@ export class MediaStorageService {
   }
 
   private buildPublicUrl(key: string): string {
-    const mediaBaseUrl = this.config.get<string>('MEDIA_BASE_URL');
+    const mediaBaseUrl = process.env.MEDIA_BASE_URL;
     if (mediaBaseUrl) {
       const normalized = mediaBaseUrl.replace(/\/+$/, '');
       return `${normalized}/${this.bucket}/${key}`;
