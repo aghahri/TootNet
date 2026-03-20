@@ -53,11 +53,32 @@ export class MediaStorageService {
    * Prefer this over MEDIA_BASE_URL / plain paths for private buckets.
    */
   async buildPresignedUrl(key: string): Promise<string> {
-    return this.client.presignedGetObject(
+    const presignedUrl = await this.client.presignedGetObject(
       this.bucket,
       key,
       MediaStorageService.PRESIGNED_GET_EXPIRY_SECONDS,
     );
+
+    return this.rewritePresignedUrlOrigin(presignedUrl);
+  }
+
+  /**
+   * Rewrites only the origin (scheme+host+port) for public clients, preserving
+   * the full path and query string from the original presigned URL.
+   */
+  private rewritePresignedUrlOrigin(presignedUrl: string): string {
+    const publicBase = process.env.MEDIA_PUBLIC_BASE_URL;
+    if (!publicBase) return presignedUrl;
+
+    try {
+      const source = new URL(presignedUrl);
+      const target = new URL(publicBase);
+      source.protocol = target.protocol;
+      source.host = target.host;
+      return source.toString();
+    } catch {
+      return presignedUrl;
+    }
   }
 
   async uploadObject(
