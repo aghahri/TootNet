@@ -39,25 +39,25 @@ export class MediaStorageService {
     this.bucket = bucket;
   }
 
+  /** Presigned GET URL for private objects (7 days). */
+  private static readonly PRESIGNED_GET_EXPIRY_SECONDS = 60 * 60 * 24 * 7; // 7 days
+
   private buildKey(category: MediaCategory, originalName: string): string {
     const safeName = originalName.replace(/[^a-zA-Z0-9._-]/g, '_');
     const timestamp = Date.now();
     return `${category}/${timestamp}-${safeName}`;
   }
 
-  private buildPublicUrl(key: string): string {
-    const mediaBaseUrl = process.env.MEDIA_BASE_URL;
-    if (mediaBaseUrl) {
-      const normalized = mediaBaseUrl.replace(/\/+$/, '');
-      return `${normalized}/${this.bucket}/${key}`;
-    }
-
-    const endpoint = this.config.get<string>('minio.endpoint');
-    const port = this.config.get<number>('minio.port');
-    const useSSL = this.config.get<boolean>('minio.useSSL');
-    const protocol = useSSL ? 'https' : 'http';
-    const host = port ? `${endpoint}:${port}` : endpoint;
-    return `${protocol}://${host}/${this.bucket}/${key}`;
+  /**
+   * Returns a time-limited URL clients can use to read the object without public bucket policy.
+   * Prefer this over MEDIA_BASE_URL / plain paths for private buckets.
+   */
+  async buildPresignedUrl(key: string): Promise<string> {
+    return this.client.presignedGetObject(
+      this.bucket,
+      key,
+      MediaStorageService.PRESIGNED_GET_EXPIRY_SECONDS,
+    );
   }
 
   async uploadObject(
@@ -72,7 +72,12 @@ export class MediaStorageService {
     } catch (err) {
       throw new InternalServerErrorException('Failed to upload media to storage');
     }
-    const url = this.buildPublicUrl(key);
+    let url: string;
+    try {
+      url = await this.buildPresignedUrl(key);
+    } catch {
+      throw new InternalServerErrorException('Failed to generate media read URL');
+    }
     return {
       url,
       key,
