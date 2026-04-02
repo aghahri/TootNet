@@ -15,6 +15,8 @@ export interface UploadedMediaResult {
 @Injectable()
 export class MediaStorageService {
   private readonly client: Client;
+  /** Used only for presignedGetObject so the Host in SigV4 matches what browsers use. */
+  private readonly presignClient: Client;
   private readonly bucket: string;
 
   constructor(private readonly config: ConfigService) {
@@ -37,6 +39,30 @@ export class MediaStorageService {
       secretKey,
     });
     this.bucket = bucket;
+
+    const publicBase = process.env.MEDIA_PUBLIC_BASE_URL?.trim();
+    if (publicBase) {
+      try {
+        const u = new URL(publicBase);
+        const publicUseSSL = u.protocol === 'https:';
+        const publicPort = u.port
+          ? parseInt(u.port, 10)
+          : publicUseSSL
+            ? 443
+            : 80;
+        this.presignClient = new Client({
+          endPoint: u.hostname,
+          port: publicPort,
+          useSSL: publicUseSSL,
+          accessKey,
+          secretKey,
+        });
+      } catch {
+        this.presignClient = this.client;
+      }
+    } else {
+      this.presignClient = this.client;
+    }
   }
 
   /** Presigned GET URL for private objects (7 days). */
@@ -53,32 +79,13 @@ export class MediaStorageService {
    * Prefer this over MEDIA_BASE_URL / plain paths for private buckets.
    */
   async buildPresignedUrl(key: string): Promise<string> {
-    const presignedUrl = await this.client.presignedGetObject(
+    // Must sign for the same host the browser will request. Replacing the origin
+    // after signing invalidates AWS SigV4 (SignedHeaders includes "host").
+    return this.presignClient.presignedGetObject(
       this.bucket,
       key,
       MediaStorageService.PRESIGNED_GET_EXPIRY_SECONDS,
     );
-
-    return this.rewritePresignedUrlOrigin(presignedUrl);
-  }
-
-  /**
-   * Rewrites only the origin (scheme+host+port) for public clients, preserving
-   * the full path and query string from the original presigned URL.
-   */
-  private rewritePresignedUrlOrigin(presignedUrl: string): string {
-    const publicBase = process.env.MEDIA_PUBLIC_BASE_URL;
-    if (!publicBase) return presignedUrl;
-
-    try {
-      const source = new URL(presignedUrl);
-      const target = new URL(publicBase);
-      source.protocol = target.protocol;
-      source.host = target.host;
-      return source.toString();
-    } catch {
-      return presignedUrl;
-    }
   }
 
   async uploadObject(
