@@ -21,6 +21,7 @@ import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { AppThrottlerModule } from './throttler/throttler.module';
 import { AuditModule } from './audit/audit.module';
 import { MediaModule } from './media/media.module';
+import { PostsModule } from './posts/posts.module';
 import { AppController } from './app.controller';
 
 @Module({
@@ -33,6 +34,7 @@ import { AppController } from './app.controller';
     PrismaModule,
     AuditModule,
     MediaModule,
+    PostsModule,
     PermissionsModule,
     AuthModule,
     UsersModule,

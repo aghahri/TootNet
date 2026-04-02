@@ -416,3 +416,17 @@ model Media {
   @@index([type])
   @@map("media")
 }
+
+model Post {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  text      String   @db.Text
+  mediaUrl  String?  @map("media_url") @db.VarChar(1024)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([createdAt])
+  @@map("posts")
+}
